@@ -26,15 +26,24 @@ type Response<Type> = {
   success: false
 }
 
-const validateData = (response: AxiosResponse, responseSchema: typeof PublicSchema | typeof SecretSchema): Public[] | Secret[] | null => {
-    const result = responseSchema.array().safeParse(response.data)
-    return result.success ? result.data : null
+const validatePublicData = (response: AxiosResponse): Public[] | null => {
+  const result = PublicSchema.array().safeParse(response.data)
+  return result.success ? result.data : null
 }
 
-export const apiLoad = async (endPoint: string, visitorType: string): Promise<Response<Public[] | Secret[]>> => {
-    const response = await client.get(endPoint)
-    let schema: typeof PublicSchema | typeof SecretSchema
-    visitorType === "secret" ? schema = SecretSchema : schema = PublicSchema
-    const data = validateData(response, schema)
-    return data ? { success: true, status: response.status, data } : { success: false, status: response.status  }
+const validateSecretData = (response: AxiosResponse): Secret[] | null => {
+  const result = SecretSchema.array().safeParse(response.data)
+  return result.success ? result.data : null
+}
+
+export const publicDataLoad = async (): Promise<Response<Public[]>> => {
+  const response = await client.get("api/public")
+  const data = validatePublicData(response)
+  return data ? { success: true, status: response.status, data } : { success: false, status: response.status  }
+}
+
+export const secretDataLoad = async (): Promise<Response<Secret[]>> => {
+  const response = await client.get("api/secret")
+  const data = validateSecretData(response)
+  return data ? { success: true, status: response.status, data } : { success: false, status: response.status  }
 }
