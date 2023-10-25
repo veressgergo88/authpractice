@@ -1,0 +1,17 @@
+[
+  {
+    "id": 0.1421889841332875,
+    "email": "a@a.aa",
+    "password": "$2b$10$Uz01h9kVjqeir7c/bEzB4OwnZolULmgHeCxXc1J7H3evuwzf0Lw0m"
+  },
+  {
+    "id": 0.3081408898156177,
+    "email": "b@b.bb",
+    "password": "$2b$10$TIbDQHunpXNGnBjnNL7sWO9BT9Iec6t.QaFEPmc99VBo2FnG8aWLa"
+  },
+  {
+    "id": 0.7035371152461227,
+    "email": "c@c.cc",
+    "password": "$2b$10$xUf9esQn6akhwyQagiTECOdJ02LRMHz.12ohi16zkKPbIsICUvSCO"
+  }
+]
