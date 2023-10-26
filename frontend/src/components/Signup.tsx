@@ -10,7 +10,7 @@ export const Signup = () => {
         if (result.success)
             alert("Sikeres reg")
         else
-            alert(`Sikertelen reg $result.status`)
+            alert(`Sikertelen reg ${result.status}`)
     }
 
     return (
