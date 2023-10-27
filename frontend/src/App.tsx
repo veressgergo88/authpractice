@@ -40,7 +40,7 @@ function App() {
     <main>
       {page === "signup" && (<Signup/>)}
       {page === "login" && (<Login feLogin={feLogin} />)}
-      {(page === "chat") && isLoggedIn && (<Chat/>)}
+      {(page === "chat" && isLoggedIn) && (<Chat/>)}
     </main>
   </>
   )

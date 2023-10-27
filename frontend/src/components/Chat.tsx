@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { getMessages, postMessage } from "../api"
 import { type Message } from "../api"
 
 export const Chat = () => {
     const [messages, setMessages] = useState<Message[]>([])
     const [message, setMessage] = useState("")
-    const [presentedMessages, setPresentedMessages] = useState<Message[]>([])
+    const presentedMessages = useMemo(() => { return [...messages].reverse() }, [messages])
     
     const sendMessage = async () => {
         const response = await postMessage(message)
@@ -16,25 +16,19 @@ export const Chat = () => {
         setMessage("")
     }
 
-    useEffect(() => {
-        setPresentedMessages([...messages].reverse())
-    }, [messages]) 
+    const fetchData = async () => {
+        const response = await getMessages()
+        if (!response.success) {
+            return alert(`Could not load messages ${response.status}`)
+        } 
+        setMessages(response.data)
+    }
+
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await getMessages()
-                if (!response.success){
-                    return alert(`Could not load messages ${response.status}`)
-                } else {
-                    setMessages(response.data)
-                }
-            } catch (error) {
-                console.error("Error loading messages:", error)
-            }
-        }
         fetchData()
-    },[])
+    }, [])
+    
 
     return(
         <>
@@ -44,7 +38,7 @@ export const Chat = () => {
             {presentedMessages.map((presentedMessage) => 
                 <div className="alert my-4" key={presentedMessage.id}>
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="stroke-info shrink-0 w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <span>{presentedMessage.content} {presentedMessage.email}</span>
+                    <span>{presentedMessage.content} ({presentedMessage.email})</span>
                 </div>
             )}
         </section>

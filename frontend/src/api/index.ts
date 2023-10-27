@@ -61,7 +61,7 @@ const _login = async (email: string, password: string): Promise<AxiosResponse | 
 }
 
 const LoginResponse = z.object({
-  sessionId: z.string(),
+  sessionId: z.string()
 })
 
 type LoginResponse = z.infer<typeof LoginResponse>
@@ -74,7 +74,7 @@ const validateLoginResponse = (response: AxiosResponse): LoginResponse | null =>
   return result.data
 }
 
-export const login = async (email: string, password: string): Promise<Response<null>> => {
+export const login = async (email: string, password: string): Promise<Response<LoginResponse>> => {
   const response = await _login(email, password)
   if (!response)
     return { success: false, status: 0  }
@@ -83,16 +83,16 @@ export const login = async (email: string, password: string): Promise<Response<n
   const data = validateLoginResponse(response)
   if (!data)
     return { success: false, status: response.status  }
-  return { success: true, status: response.status, data: null }
+  return { success: true, status: response.status, data }
 }
 
 const _getMessages = async (): Promise<AxiosResponse | null> => {
   try {
     const sessionId = localStorage.getItem("sessionId")
-    const response = await client.get("api/messages", { headers: { authorization: sessionId}})
+    const response = await client.get("/api/messages", { headers: { authorization: sessionId }})
     return response
   } catch (error) {
-    return ( error as AxiosError).response || null
+    return (error as AxiosError).response || null
   }
 }
 
@@ -106,7 +106,7 @@ export type Message = z.infer<typeof MessageSchema>
 
 const validateMessages = (response: AxiosResponse): Message[] | null => {
   const result = MessageSchema.array().safeParse(response.data)
-  if (!result.success){
+  if (!result.success) {
     return null
   }
   return result.data
@@ -115,21 +115,22 @@ const validateMessages = (response: AxiosResponse): Message[] | null => {
 export const getMessages = async (): Promise<Response<Message[]>> => {
   const response = await _getMessages()
   if (!response)
-    return {success: false, status: 0}
+    return { success: false, status: 0  }
   if (response.status !== 200)
-    return {success: false, status: response.status}
+    return { success: false, status: response.status  }
   const data = validateMessages(response)
   if (!data)
-    return {success: false, status: response.status}
-  return {success: true, status: response.status, data}
+    return { success: false, status: response.status  }
+  return { success: true, status: response.status, data }
 }
 
 const _postMessage = async (content: string): Promise<AxiosResponse | null> => {
   try {
     const sessionId = localStorage.getItem("sessionId")
-    const response = await client.post("/api/messages", {content}, {headers: { authorization: sessionId}})
+    const response = await client
+      .post("/api/messages", { content}, { headers: { authorization: sessionId }})
     return response
-  } catch (error){
+  } catch (error) {
     return (error as AxiosError).response || null
   }
 }

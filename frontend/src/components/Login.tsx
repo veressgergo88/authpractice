@@ -11,10 +11,12 @@ export const Login = (props: LoginProps) => {
 
     const handleLogin = async () => {
         const result = await login(email, password)
-        if (result.success)
+        if (result.success) {
             props.feLogin()
-        else
+            localStorage.setItem("sessionId", result.data.sessionId)
+        } else {
             alert(`Sikertelen Login $result.status`)
+        }
     }
 
     return (
