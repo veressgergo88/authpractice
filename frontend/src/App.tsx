@@ -1,16 +1,38 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Signup } from './components/Signup'
 import { Login } from './components/Login'
 import { Chat } from './components/Chat'
+import { jwtDecode } from 'jwt-decode'
 
 function App() {
   const [page, setPage] = useState("signup")
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [loggedInUser, setLoggedInUser] = useState("")
 
+  const logout = () => {
+    localStorage.removeItem("sessionId")
+    feLogout()
+  }
+  
+  const feLogout = () => {
+    setIsLoggedIn(false)
+    setPage("login")
+    setLoggedInUser("")
+  }
+  
   const feLogin = () => {
     setIsLoggedIn(true)
     setPage("chat")
+    const existingToken = localStorage.getItem("sessionId")
+    if (existingToken)
+    setLoggedInUser(jwtDecode(existingToken) as any)?.email
   }
+
+  useEffect(() => {
+    const existingToken = localStorage.getItem("sessionId")
+    if (existingToken)
+      feLogin()
+  }, [])
   
   return (
     <>
@@ -31,8 +53,8 @@ function App() {
         Login
       </button>
       {isLoggedIn &&
-      (<button className="btn" onClick={() => setPage("chat")}>
-        Chat
+      (<button className="btn" onClick={logout}>
+        Logout
       </button>)}
     </div>
     </div>
@@ -40,7 +62,7 @@ function App() {
     <main>
       {page === "signup" && (<Signup/>)}
       {page === "login" && (<Login feLogin={feLogin} />)}
-      {(page === "chat" && isLoggedIn) && (<Chat/>)}
+      {(page === "chat" && isLoggedIn) && (<Chat loggedInUser={loggedInUser}/>)}
     </main>
   </>
   )

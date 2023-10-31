@@ -6,7 +6,7 @@ export const signup = async (email: string, password: string) => {
     method: "POST",
     url: "/api/user/signup",
     data: { email, password }
-  }, z.null())
+  }, z.literal("OK"))
 }
 
 const LoginResponse = z.object({
@@ -26,6 +26,8 @@ const MessageSchema = z.object({
   content: z.string(),
   email: z.string()
 })
+
+export type Message = z.infer<typeof MessageSchema>
 
 export const getMessages = async () => {
   return request({

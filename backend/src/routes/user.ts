@@ -2,22 +2,15 @@ import express from "express";
 import { writeFileSafe, readFileSafe } from "../util/filesystem";
 import { z } from "zod";
 import { hash, validate } from "../util/hash"
+import { sign } from "jsonwebtoken"
 
 const userDb = `${__dirname}/../../database/users.json`
-const sessionDb = `${__dirname}/../../database/sessions.json`
 
 const UserSchema = z.object({
   id: z.number(),
   email: z.string().email(),
   password: z.string().min(3),
 })
-
-const SessionSchema = z.object({
-  email: z.string().email(),
-  createdAt: z.string().datetime({ offset: true }),
-})
-
-const SessionDBSchema = z.record(SessionSchema)
 
 const SignupRequestSchema = z.object({
   email: z.string().email(),
@@ -78,19 +71,7 @@ router.post('/login', async (req, res) => {
   if (!passwordMatches)
     return res.sendStatus(401)
 
-  const sessionId = Math.random().toString()
-
-  const sessions = await readFileSafe(sessionDb, SessionDBSchema)
-  if (!sessions)
-    return res.sendStatus(500)
-
-  sessions[sessionId] = {
-    email: userToLogin.email,
-    createdAt: new Date().toISOString()
-  }
-
-  await writeFileSafe(sessionDb, sessions)
-
+  const sessionId = sign({ email: userToLogin.email }, "serversecret", { expiresIn: "2h" })
   return res.json({ sessionId })
 })
 

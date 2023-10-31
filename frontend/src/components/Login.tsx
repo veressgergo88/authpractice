@@ -12,8 +12,8 @@ export const Login = (props: LoginProps) => {
     const handleLogin = async () => {
         const result = await login(email, password)
         if (result.success) {
-            props.feLogin()
             localStorage.setItem("sessionId", result.data.sessionId)
+            props.feLogin()
         } else {
             alert(`Sikertelen Login $result.status`)
         }

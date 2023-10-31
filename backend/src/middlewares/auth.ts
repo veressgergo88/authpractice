@@ -1,12 +1,16 @@
 import { Request, Response, NextFunction } from "express"
 import { z } from "zod"
 import { readFileSafe } from "../util/filesystem"
+import { verify } from "jsonwebtoken"
 
-const sessionDb = `${__dirname}/../../database/sessions.json`
 const userDb = `${__dirname}/../../database/users.json`
 
 const HeaderSchema = z.object({
   authorization: z.string(),
+})
+
+const SessionData = z.object({
+  email: z.string(),
 })
 
 const UserSchema = z.object({
@@ -15,40 +19,23 @@ const UserSchema = z.object({
   password: z.string().min(3),
 })
 
-const SessionSchema = z.object({
-  email: z.string().email(),
-  createdAt: z.string().datetime({ offset: true }),
-})
-
-const SessionDBSchema = z.record(SessionSchema)
-
 export const auth = async (req: Request, res: Response, next: NextFunction) => {
   const reqParseResult = HeaderSchema.safeParse(req.headers)
   if (!reqParseResult.success)
     return next()
 
-  const sessionId = reqParseResult.data.authorization
-
-  const sessions = await readFileSafe(sessionDb, SessionDBSchema)
-  if (!sessions)
+  const payload = verify(reqParseResult.data.authorization, "serversecret")
+  const result = SessionData.safeParse(payload)
+  if (!result.success)
     return next()
 
-  const session = sessions[sessionId]
-
-  if (!session)
-    return next()
-
-  const nowMillis = new Date().getTime()
-  const createdAtMillis = new Date(session.createdAt).getTime()
-
-  if (nowMillis > createdAtMillis + 20*1000)
-    return undefined
+  const email = result.data.email
 
   const existingUsers = await readFileSafe(userDb, UserSchema.array())
   if (!existingUsers)
     return next()
 
-  const userToLogin = existingUsers.find(user => user.email === session.email)
+  const userToLogin = existingUsers.find(user => user.email === email)
   if (!userToLogin)
     return next()
 

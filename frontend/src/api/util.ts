@@ -17,6 +17,8 @@ const client = axios.create({
 const validate = <Schema extends z.ZodTypeAny>(data: unknown, schema: Schema): z.infer<typeof schema> | null => {
   const result = schema.safeParse(data)
   if (!result.success) {
+    console.log(result.error)
+    console.log(data)
     return null
   }
   return result.data
